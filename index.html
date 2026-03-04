@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ระบบสอบปลายภาคออนไลน์ ม.3</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS & SweetAlert2 -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Theme Configuration -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec", "primary-dark": "#0d42b0", "background-light": "#f6f6f8", "background-dark": "#101622",
+                        "surface-light": "#ffffff", "surface-dark": "#1a2230", "text-main": "#1e293b", "text-muted": "#64748b",
+                        "text-main-light": "#111318", "text-main-dark": "#e2e8f0", "text-sub-light": "#616f89", "text-sub-dark": "#94a3b8",
+                        "border-light": "#dbdfe6", "border-dark": "#2d3748",
+                    },
+                    fontFamily: { "display": ["Lexend", "Noto Sans Thai", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Lexend', 'Noto Sans Thai', sans-serif; min-height: max(884px, 100dvh); -webkit-tap-highlight-color: transparent; }
+        .view { display: none; }
+        .view.active { display: flex; animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .nav-btn.answered { background-color: #dbeafe; color: #135bec; border-color: #bfdbfe; font-weight: bold; }
+        .nav-btn.current { box-shadow: 0 0 0 2px #135bec; background-color: #135bec; color: white; border-color: #135bec;}
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display antialiased selection:bg-primary selection:text-white w-full">
+
+    <!-- ============================================== -->
+    <!-- VIEW 1: LOGIN -->
+    <!-- ============================================== -->
+    <div id="view-login" class="view active flex-col items-center justify-center p-4 min-h-screen">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 shadow-xl rounded-2xl overflow-hidden flex flex-col relative py-8">
+            <div class="flex flex-col items-center pt-4 pb-6 px-6">
+                <div class="relative mb-6 group">
+                    <div class="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-110"></div>
+                    <div class="relative h-28 w-28 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                        <img src="https://img5.pic.in.th/file/secure-sv1/unnamed787b948845091a99.md.png" alt="โลโก้โรงเรียน" class="w-full h-full object-contain p-2">
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white text-center mb-1">โรงเรียนบ้านนาดินดำ</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium text-center">สพป. เลย 1<br>ระบบสอบปลายภาคเรียนที่ 2 ปีการศึกษา 2568</p>
+            </div>
+
+            <div class="px-6 pb-6">
+                <div class="bg-background-light dark:bg-background-dark rounded-xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm">
+                    <div class="mb-6 text-center">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">ลงชื่อเข้าใช้</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">กรุณากรอกเลขประจำตัวประชาชน 13 หลัก<br/>เพื่อยืนยันตัวตนเข้าสู่ระบบสอบ</p>
+                    </div>
+                    
+                    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="citizenId">เลขบัตรประจำตัวประชาชน</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-slate-400 text-[20px]">badge</span>
+                                </div>
+                                <input id="citizenId" type="text" maxlength="13" required
+                                    class="block w-full pl-10 pr-3 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base tracking-widest font-mono text-center" 
+                                    placeholder="X-XXXX-XXXXX-XX-X" oninput="this.value = this.value.replace(/[^0-9]/g, '')"/>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-3.5 px-4 rounded-lg shadow-lg shadow-primary/30 transition-all duration-200 transform active:scale-[0.98] flex items-center justify-center gap-2 group">
+                            <span>เข้าสู่ระบบ</span>
+                            <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">login</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="px-6 pb-6">
+                <div class="border-t border-slate-100 dark:border-slate-800 pt-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-amber-500">info</span>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">คู่มือการสอบเบื้องต้น</h4>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                            <span class="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+                            <span>เข้าสู่ระบบด้วยเลขบัตรประชาชน จากนั้นเลือกวิชาที่ต้องการสอบ</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                            <span class="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+                            <span>สามารถกดไอคอนตาราง <span class="material-symbols-outlined text-[14px] align-middle">grid_view</span> ด้านล่าง เพื่อเลือกข้ามไปทำข้ออื่นได้</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                            <span class="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+                            <span>เมื่อทำเสร็จ ให้กดปุ่ม "ส่งคำตอบ" สีแดง ด้านบนขวา</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-auto text-center pb-4">
+                <button onclick="showAdminLogin()" class="text-xs text-slate-400 hover:text-primary transition flex items-center justify-center w-full gap-1">
+                    <span class="material-symbols-outlined !text-[14px]">admin_panel_settings</span> สำหรับผู้ดูแลระบบ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 2: SUBJECT DASHBOARD -->
+    <!-- ============================================== -->
+    <div id="view-dashboard" class="view flex-col overflow-x-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-xl min-h-screen relative w-full">
+        <header class="flex flex-col px-6 pt-8 pb-6 bg-surface-light dark:bg-surface-dark rounded-b-[2rem] shadow-sm z-10 sticky top-0">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="relative group cursor-pointer">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-primary/20 bg-slate-200 flex items-center justify-center overflow-hidden text-slate-500">
+                            <span class="material-symbols-outlined !text-[32px]">person</span>
+                        </div>
+                        <div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-surface-dark"></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <h1 class="text-text-main dark:text-white text-lg font-bold leading-tight" id="header-student-name">สวัสดี, นักเรียน</h1>
+                        <p class="text-text-muted dark:text-slate-400 text-sm font-medium">มัธยมศึกษาปีที่ 3</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-red-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50">
+                    <span class="material-symbols-outlined !text-[28px]">logout</span>
+                </button>
+            </div>
+
+            <div class="bg-primary rounded-2xl p-5 text-white shadow-lg shadow-primary/30 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="relative z-10 flex justify-between items-end">
+                    <div>
+                        <p class="text-blue-100 text-xs font-medium mb-1">วิชาที่สอบผ่านแล้ว</p>
+                        <h2 class="text-2xl font-bold" id="dash-passed-count">0 / 2 วิชา</h2>
+                    </div>
+                    <div class="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-white">assignment_turned_in</span>
+                    </div>
+                </div>
+                <div class="mt-4 h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
+                    <div id="dash-progress-bar" class="h-full bg-white w-0 rounded-full transition-all duration-1000"></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 flex flex-col gap-5 p-6 pb-24">
+            <div class="flex items-center justify-between">
+                <h3 class="text-text-main dark:text-white text-xl font-bold">วิชาที่เปิดสอบ</h3>
+            </div>
+            <div id="subjectList" class="flex flex-col gap-4">
+                <!-- Subject Cards -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 3: LIVE EXAM -->
+    <!-- ============================================== -->
+    <div id="view-exam" class="view flex-col min-h-screen bg-background-light dark:bg-background-dark w-full relative">
+        <header class="sticky top-0 z-30 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark shadow-sm">
+            <div class="px-4 py-3 flex items-center justify-between max-w-2xl mx-auto w-full">
+                <div class="w-10"></div> 
+                <div class="flex flex-col items-center">
+                    <h1 class="text-text-main-light dark:text-text-main-dark text-base font-bold leading-tight tracking-tight">การสอบปลายภาค ม.3</h1>
+                    <span id="q-subject-badge" class="text-xs text-text-sub-light dark:text-text-sub-dark font-normal">วิชา...</span>
+                </div>
+                <button onclick="confirmSubmit()" class="flex items-center justify-center py-1.5 px-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
+                    <span class="text-sm font-bold">ส่งคำตอบ</span>
+                </button>
+            </div>
+            <div class="px-4 pb-4 pt-3 w-full max-w-2xl mx-auto">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">ความคืบหน้า</span>
+                    <span id="progress-text" class="text-sm font-bold text-primary">0 / 0</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-border-dark rounded-full h-2 overflow-hidden">
+                    <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow flex flex-col p-4 pb-28 max-w-2xl mx-auto w-full">
+            <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 shadow-sm border border-border-light dark:border-border-dark mb-4">
+                <div class="flex items-start gap-3 mb-4">
+                    <span id="q-number-title" class="flex-shrink-0 bg-primary text-white text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center shadow-sm">1</span>
+                    <h2 id="q-text" class="text-lg md:text-xl font-bold text-text-main-light dark:text-text-main-dark leading-relaxed mt-0.5">โหลดคำถาม...</h2>
+                </div>
+            </div>
+            <div id="q-choices-container" class="flex flex-col gap-3"></div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark px-4 py-3 safe-area-pb z-20">
+            <div class="flex items-center justify-between max-w-2xl mx-auto gap-4">
+                <button onclick="prevQuestion()" class="flex items-center gap-2 px-4 py-3 rounded-lg text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors font-medium">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    <span class="hidden sm:inline">ก่อนหน้า</span>
+                </button>
+                <button onclick="toggleNavigator()" class="flex items-center justify-center p-3 rounded-full bg-background-light dark:bg-background-dark text-primary hover:bg-primary/10 transition-colors shadow-sm border border-border-light dark:border-border-dark">
+                    <span class="material-symbols-outlined">grid_view</span>
+                </button>
+                <button onclick="nextQuestion()" class="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all font-bold">
+                    <span>ถัดไป</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </div>
+        </nav>
+
+        <div id="navigator-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center transition-opacity">
+            <div class="bg-surface-light w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl max-h-[80vh] flex flex-col transform transition-transform">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-bold text-lg text-text-main-light">กระดาษคำตอบ</h3>
+                        <p class="text-xs text-text-sub-light">เลือกข้อที่ต้องการข้ามไป</p>
+                    </div>
+                    <button onclick="toggleNavigator()" class="p-2 bg-slate-100 rounded-full hover:bg-slate-200 text-slate-600"><span class="material-symbols-outlined !text-[20px]">close</span></button>
+                </div>
+                <div id="q-navigator" class="grid grid-cols-5 gap-3 overflow-y-auto p-1 hide-scrollbar pb-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 4: RESULT -->
+    <!-- ============================================== -->
+    <div id="view-result" class="view flex-col overflow-x-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-xl min-h-screen relative w-full">
+        <header class="flex flex-col px-6 pt-12 pb-6 bg-surface-light dark:bg-surface-dark rounded-b-[2rem] shadow-sm z-10 sticky top-0 border-b-4" id="result-header-border">
+            <div class="flex items-center justify-center mb-4">
+                <div id="result-icon-container" class="h-20 w-20 rounded-full flex items-center justify-center bg-green-100 text-green-500 ring-8 ring-green-50">
+                    <span id="result-icon" class="material-symbols-outlined !text-[48px]">check_circle</span>
+                </div>
+            </div>
+            <div class="text-center">
+                <h1 id="result-badge-text" class="text-2xl font-black text-green-600 mb-1">สอบผ่านเกณฑ์!</h1>
+                <p id="result-subject-text" class="text-slate-500 font-medium">วิชา: ...</p>
+            </div>
+        </header>
+
+        <main class="flex-1 flex flex-col gap-6 p-6 pb-24">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+                <p class="text-slate-500 text-sm font-medium mb-2">คะแนนที่ได้</p>
+                <div class="flex items-end justify-center gap-1 mb-4">
+                    <span id="result-score" class="text-5xl font-black text-slate-800">0</span>
+                    <span class="text-xl text-slate-400 font-medium mb-1">/ <span id="result-max">0</span></span>
+                </div>
+                <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden mt-4">
+                    <div id="result-percent-bar" class="h-full bg-green-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- ส่วนแสดงเฉลยและฟีดแบ็คสำหรับข้อที่ตอบผิด -->
+            <div id="result-feedback-container" class="hidden flex-col gap-4">
+                <h3 class="text-lg font-bold text-slate-800 border-b border-slate-200 pb-2">เฉลยข้อที่ตอบผิด</h3>
+                <div id="result-feedback-list" class="flex flex-col gap-3">
+                    <!-- จะถูกเติมด้วย JavaScript -->
+                </div>
+            </div>
+
+            <button onclick="switchView('view-dashboard'); renderDashboard();" class="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-900 text-white px-5 py-4 font-bold transition-transform active:scale-95 shadow-lg">
+                <span class="material-symbols-outlined">home</span>
+                กลับสู่หน้าหลัก (Dashboard)
+            </button>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 5: ADMIN DASHBOARD -->
+    <!-- ============================================== -->
+    <div id="view-admin" class="view flex-col min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 w-full relative">
+        <div class="sticky top-0 z-10 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 shadow-sm">
+            <div class="flex items-center justify-between max-w-4xl mx-auto w-full">
+                <div class="flex items-center gap-3">
+                    <button onclick="switchView('view-login')" class="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <div>
+                        <h1 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">แผงควบคุมครู</h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">ภาพรวมการสอบ ม.3</p>
+                    </div>
+                </div>
+                <button onclick="exportCSV()" class="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    <span class="text-sm font-medium hidden sm:inline">โหลด CSV</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto pb-8 max-w-4xl mx-auto w-full">
+            <div class="grid grid-cols-2 gap-4 p-4">
+                <div class="col-span-2 bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-100 dark:border-slate-700">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">จำนวนการเข้าสอบทั้งหมด</p>
+                            <h3 id="admin-total" class="text-3xl font-black text-slate-900 dark:text-white">0</h3>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined !text-[28px]">group</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-100 dark:border-slate-700">
+                    <div class="flex flex-col gap-2">
+                        <div class="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1">
+                            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">สอบผ่าน</p>
+                        <h3 id="admin-passed" class="text-2xl font-bold text-slate-900 dark:text-white">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-100 dark:border-slate-700">
+                    <div class="flex flex-col gap-2">
+                        <div class="h-8 w-8 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-1">
+                            <span class="material-symbols-outlined text-[20px]">cancel</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">สอบไม่ผ่าน</p>
+                        <h3 id="admin-failed" class="text-2xl font-bold text-slate-900 dark:text-white">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 mt-2">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-3">บันทึกการสอบล่าสุด</h2>
+                <div id="admin-student-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script>
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby6sex0E49hUdVGa1gogISX5dozFE9DO7E5r3Od3Zeh988eIHXUoboI3JT6NI2PV7D-/exec'; 
+
+        const state = {
+            student: null, history: {},
+            exam: { attemptId: null, subject: null, questions: [], answers: {}, currentIndex: 0 },
+            subjectsList: ['สังคมศึกษา', 'ประวัติศาสตร์']
+        };
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        async function callAPI(action, payload) {
+            Swal.fire({ title: 'กำลังโหลดข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            // 🌐 REAL API CALL
+            try {
+                const response = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action, payload }) });
+                const result = await response.json();
+                Swal.close();
+                if (result.status === 'success') return result.data;
+                else throw new Error(result.message);
+            } catch (error) {
+                Swal.fire('ข้อผิดพลาด', error.message, 'error');
+                throw error;
+            }
+        }
+
+        function validateThaiID(id) {
+            if(id.length !== 13) return false;
+            let sum = 0; for(let i=0; i < 12; i++) sum += parseFloat(id.charAt(i)) * (13 - i);
+            return (11 - sum % 11) % 10 === parseFloat(id.charAt(12));
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const citizenId = document.getElementById('citizenId').value;
+            if (!validateThaiID(citizenId)) { Swal.fire('รูปแบบไม่ถูกต้อง', 'เลขประจำตัวประชาชนไม่ครบ 13 หลัก', 'warning'); return; }
+            
+            try {
+                const data = await callAPI('login', { citizenId });
+                state.student = data.student; state.history = data.history;
+                document.getElementById('header-student-name').textContent = `สวัสดี, ${state.student.name.split(' ')[1] || state.student.name}`;
+                renderDashboard(); switchView('view-dashboard');
+            } catch(e) {}
+        }
+
+        function logout() {
+            Swal.fire({ title: 'ออกจากระบบ?', icon: 'question', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#ef4444' })
+            .then((result) => {
+                if(result.isConfirmed) { state.student = null; document.getElementById('loginForm').reset(); switchView('view-login'); }
+            });
+        }
+
+        function renderDashboard() {
+            const listEl = document.getElementById('subjectList'); listEl.innerHTML = '';
+            let passedCount = 0;
+            
+            state.subjectsList.forEach(subject => {
+                const hist = state.history[subject]; let cardHtml = '';
+                if (!hist) {
+                    cardHtml = `
+                    <div class="group relative flex flex-col gap-4 rounded-2xl bg-surface-light p-5 shadow-sm border border-slate-100">
+                        <div class="flex items-start justify-between">
+                            <div class="flex gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600"><span class="material-symbols-outlined">menu_book</span></div>
+                                <div><h4 class="text-lg font-bold">${subject}</h4><p class="text-slate-400 text-xs mt-1">สอบปลายภาคเรียนที่ 2</p></div>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between border-t border-slate-100 pt-4">
+                            <div class="flex flex-col"><span class="text-xs text-slate-400">สถานะ</span><span class="text-sm font-semibold text-orange-500">ยังไม่ได้สอบ</span></div>
+                            <button onclick="confirmStartExam('${subject}')" class="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-lg shadow-primary/25 hover:bg-blue-600 active:scale-95"><span class="material-symbols-outlined !text-[20px]">play_circle</span> เริ่มสอบ</button>
+                        </div>
+                    </div>`;
+                } else if (hist.passed) {
+                    passedCount++;
+                    cardHtml = `
+                    <div class="group relative flex flex-col gap-4 rounded-2xl bg-surface-light p-5 shadow-sm border border-slate-100 opacity-90">
+                        <div class="flex items-start justify-between">
+                            <div class="flex gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><span class="material-symbols-outlined">check_circle</span></div>
+                                <div><h4 class="text-lg font-bold">${subject}</h4></div>
+                            </div>
+                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">ส่งแล้ว</span>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between border-t border-slate-100 pt-4 bg-slate-50 -mx-5 -mb-5 px-5 py-3 rounded-b-2xl">
+                            <div class="flex flex-col"><span class="text-xs text-slate-400">ผลการสอบ</span><span class="text-sm font-bold text-emerald-600">ผ่านเกณฑ์</span></div>
+                            <div class="flex items-end gap-1"><span class="text-2xl font-bold">${hist.score}</span><span class="text-sm text-slate-400 font-medium mb-1">คะแนน</span></div>
+                        </div>
+                    </div>`;
+                } else {
+                    cardHtml = `
+                    <div class="group relative flex flex-col gap-4 rounded-2xl bg-surface-light p-5 shadow-sm border border-slate-100">
+                        <div class="flex items-start justify-between">
+                            <div class="flex gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600"><span class="material-symbols-outlined">cancel</span></div>
+                                <div><h4 class="text-lg font-bold">${subject}</h4></div>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between border-t border-slate-100 pt-4 bg-rose-50 -mx-5 -mb-5 px-5 py-3 rounded-b-2xl">
+                            <div class="flex flex-col"><span class="text-xs text-slate-400">ผลการสอบล่าสุด</span><span class="text-sm font-bold text-rose-600">ไม่ผ่านเกณฑ์ (${hist.score} คะแนน)</span></div>
+                            <button onclick="confirmStartExam('${subject}')" class="flex items-center gap-1 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-600 active:scale-95">สอบซ่อม</button>
+                        </div>
+                    </div>`;
+                }
+                listEl.innerHTML += cardHtml;
+            });
+            document.getElementById('dash-passed-count').innerText = `${passedCount} / ${state.subjectsList.length} วิชา`;
+            document.getElementById('dash-progress-bar').style.width = `${(passedCount / state.subjectsList.length) * 100}%`;
+        }
+
+        function confirmStartExam(subject) {
+            Swal.fire({ title: `เริ่มสอบวิชา ${subject}?`, text: "กรุณาตรวจสอบอินเทอร์เน็ตก่อนเริ่มทำข้อสอบ", icon: 'question', showCancelButton: true, confirmButtonText: 'เริ่มสอบ', confirmButtonColor: '#135bec' })
+            .then(async (result) => {
+                if(result.isConfirmed) {
+                    try {
+                        const data = await callAPI('startExam', { citizenId: state.student.citizenId, subject: subject });
+                        state.exam = { attemptId: data.attemptId, subject, questions: data.questions, answers: {}, currentIndex: 0 };
+                        renderExamUI(); switchView('view-exam');
+                    } catch(e) {}
+                }
+            });
+        }
+
+        function toggleNavigator() { document.getElementById('navigator-modal').classList.toggle('hidden'); }
+
+        function renderExamUI() {
+            const navEl = document.getElementById('q-navigator'); navEl.innerHTML = '';
+            state.exam.questions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `nav-btn w-full aspect-square flex items-center justify-center rounded-lg border text-sm transition-colors ${idx === state.exam.currentIndex ? 'current' : 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50'}`;
+                btn.innerText = idx + 1;
+                btn.onclick = () => { jumpToQuestion(idx); toggleNavigator(); };
+                if(state.exam.answers[q.qId] && idx !== state.exam.currentIndex) btn.classList.add('answered');
+                navEl.appendChild(btn);
+            });
+
+            const answeredCount = Object.keys(state.exam.answers).length; const total = state.exam.questions.length;
+            document.getElementById('progress-text').innerText = `${answeredCount} / ${total}`;
+            document.getElementById('progress-bar').style.width = `${(answeredCount/total)*100}%`;
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            const q = state.exam.questions[state.exam.currentIndex];
+            document.getElementById('q-number-title').innerText = state.exam.currentIndex + 1;
+            document.getElementById('q-subject-badge').innerText = `วิชา${state.exam.subject}`;
+            document.getElementById('q-text').innerText = q.questionText;
+
+            const choicesContainer = document.getElementById('q-choices-container'); choicesContainer.innerHTML = '';
+            const selectedChoice = state.exam.answers[q.qId];
+            const choiceLabels = { 'A': 'ก', 'B': 'ข', 'C': 'ค', 'D': 'ง', 'E': 'จ' };
+
+            ['A', 'B', 'C', 'D', 'E'].forEach(key => {
+                if(!q.choices[key]) return;
+                const isChecked = selectedChoice === key;
+                choicesContainer.innerHTML += `
+                <label class="group relative flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:border-primary/50 ${isChecked ? 'border-primary bg-primary/5' : 'border-border-light bg-surface-light'}">
+                    <input type="radio" name="choice" value="${key}" class="peer sr-only" ${isChecked ? 'checked' : ''} onchange="selectAnswer('${q.qId}', '${key}')"/>
+                    <div class="flex-shrink-0 w-6 h-6 mt-0.5 rounded-full border-2 border-slate-300 group-hover:border-primary peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-white text-[16px] opacity-0 peer-checked:opacity-100">check</span>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="block text-sm font-bold text-slate-500 mb-0.5 group-hover:text-primary peer-checked:text-primary">${choiceLabels[key]}.</span>
+                        <span class="text-base font-medium text-slate-800 group-hover:text-primary peer-checked:text-primary">${q.choices[key]}</span>
+                    </div>
+                </label>`;
+            });
+        }
+
+        function selectAnswer(qId, choiceKey) { state.exam.answers[qId] = choiceKey; renderExamUI(); }
+        function prevQuestion() { if (state.exam.currentIndex > 0) { state.exam.currentIndex--; renderExamUI(); } }
+        function nextQuestion() { if (state.exam.currentIndex < state.exam.questions.length - 1) { state.exam.currentIndex++; renderExamUI(); } }
+        function jumpToQuestion(idx) { state.exam.currentIndex = idx; renderExamUI(); }
+
+        function confirmSubmit() {
+            const answered = Object.keys(state.exam.answers).length; const total = state.exam.questions.length;
+            let text = "ตรวจสอบคำตอบให้ถี่ถ้วนก่อนส่งมอบ";
+            if(answered < total) text = `คุณยังทำไม่ครบ (${answered}/${total} ข้อ) แน่ใจหรือไม่?`;
+
+            Swal.fire({ title: 'ยืนยันส่งกระดาษคำตอบ?', text, icon: answered < total ? 'warning' : 'question', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'ส่งคำตอบ' })
+            .then((result) => { if (result.isConfirmed) executeSubmitExam(); });
+        }
+
+        async function executeSubmitExam() {
+            const formattedAnswers = Object.entries(state.exam.answers).map(([k, v]) => ({ qId: k, selectedChoice: v }));
+            try {
+                const resultData = await callAPI('submitExam', { attemptId: state.exam.attemptId, answers: formattedAnswers });
+                state.history[state.exam.subject] = { score: resultData.score, passed: resultData.passed };
+                renderResult(resultData); switchView('view-result');
+            } catch (e) {}
+        }
+
+        function renderResult(data) {
+            document.getElementById('result-subject-text').innerText = `วิชา: ${state.exam.subject}`;
+            document.getElementById('result-score').innerText = data.score;
+            document.getElementById('result-max').innerText = data.maxScore;
+            setTimeout(() => { document.getElementById('result-percent-bar').style.width = `${data.percent}%`; }, 300);
+
+            const headerBorder = document.getElementById('result-header-border'); const iconContainer = document.getElementById('result-icon-container');
+            const icon = document.getElementById('result-icon'); const badgeText = document.getElementById('result-badge-text'); const bar = document.getElementById('result-percent-bar');
+
+            if(data.passed) {
+                headerBorder.className = "flex flex-col px-6 pt-12 pb-6 bg-surface-light rounded-b-[2rem] shadow-sm z-10 sticky top-0 border-b-4 border-green-500";
+                iconContainer.className = "h-20 w-20 rounded-full flex items-center justify-center bg-green-100 text-green-500 ring-8 ring-green-50";
+                icon.innerText = "check_circle"; badgeText.innerText = "สอบผ่านเกณฑ์!"; badgeText.className = "text-2xl font-black text-green-600 mb-1";
+                bar.className = "h-full bg-green-500 rounded-full transition-all duration-1000";
+            } else {
+                headerBorder.className = "flex flex-col px-6 pt-12 pb-6 bg-surface-light rounded-b-[2rem] shadow-sm z-10 sticky top-0 border-b-4 border-rose-500";
+                iconContainer.className = "h-20 w-20 rounded-full flex items-center justify-center bg-rose-100 text-rose-500 ring-8 ring-rose-50";
+                icon.innerText = "cancel"; badgeText.innerText = "ไม่ผ่านเกณฑ์"; badgeText.className = "text-2xl font-black text-rose-600 mb-1";
+                bar.className = "h-full bg-rose-500 rounded-full transition-all duration-1000";
+            }
+
+            // แสดงฟีดแบ็คข้อที่ตอบผิด
+            const feedbackContainer = document.getElementById('result-feedback-container');
+            const feedbackList = document.getElementById('result-feedback-list');
+            feedbackList.innerHTML = '';
+            
+            const engToThaiAns = { 'A':'ก', 'B':'ข', 'C':'ค', 'D':'ง', 'E':'จ' };
+
+            if (data.details && data.details.length > 0) {
+                const wrongAnswers = data.details.filter(d => !d.isCorrect);
+                
+                if (wrongAnswers.length > 0) {
+                    feedbackContainer.classList.remove('hidden');
+                    feedbackContainer.classList.add('flex');
+                    
+                    wrongAnswers.forEach((item) => {
+                        const qIndex = state.exam.questions.findIndex(q => String(q.qId) === String(item.qId));
+                        const qNum = qIndex > -1 ? qIndex + 1 : '?';
+                        const qText = qIndex > -1 ? state.exam.questions[qIndex].questionText : 'คำถามไม่ทราบ';
+                        const qChoices = qIndex > -1 ? state.exam.questions[qIndex].choices : {};
+                        
+                        const selThai = engToThaiAns[item.selectedChoice] || '-';
+                        const corThai = engToThaiAns[item.correctChoice] || '-';
+                        
+                        const selFullText = item.selectedChoice && qChoices[item.selectedChoice] ? `${selThai}. ${qChoices[item.selectedChoice]}` : 'ไม่ได้ตอบ';
+                        const corFullText = item.correctChoice && qChoices[item.correctChoice] ? `${corThai}. ${qChoices[item.correctChoice]}` : '-';
+
+                        feedbackList.innerHTML += `
+                        <div class="bg-rose-50 rounded-xl p-4 border border-rose-100 text-sm">
+                            <p class="font-bold text-slate-800 mb-2">ข้อ ${qNum}. ${qText}</p>
+                            <div class="flex flex-col gap-1.5 mt-2">
+                                <p class="text-rose-600 font-medium flex items-start gap-1">
+                                    <span class="material-symbols-outlined text-[18px] mt-0.5">cancel</span>
+                                    <span>คุณตอบ: ${selFullText}</span>
+                                </p>
+                                <p class="text-emerald-600 font-bold flex items-start gap-1">
+                                    <span class="material-symbols-outlined text-[18px] mt-0.5">check_circle</span>
+                                    <span>เฉลย: ${corFullText}</span>
+                                </p>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    feedbackContainer.classList.add('hidden');
+                    feedbackContainer.classList.remove('flex');
+                }
+            } else {
+                feedbackContainer.classList.add('hidden');
+                feedbackContainer.classList.remove('flex');
+            }
+        }
+
+        function showAdminLogin() {
+            Swal.fire({ title: 'เข้าสู่ระบบผู้ดูแล', input: 'password', inputPlaceholder: 'PIN Code (เช่น 1234)', showCancelButton: true, confirmButtonText: 'ตกลง', confirmButtonColor: '#135bec' })
+            .then(async (result) => {
+                if (result.isConfirmed && result.value) {
+                    try {
+                        const stats = await callAPI('getAdminStats', { adminPin: result.value });
+                        document.getElementById('admin-total').innerText = stats.totalAttempts; document.getElementById('admin-passed').innerText = stats.passed; document.getElementById('admin-failed').innerText = stats.failed;
+                        window.adminRawData = stats.rawData;
+                        const listEl = document.getElementById('admin-student-list'); listEl.innerHTML = '';
+                        stats.rawData.reverse().forEach(row => {
+                            const passedUI = row.passed ? `<span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">ผ่าน</span>` : `<span class="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/10">ไม่ผ่าน</span>`;
+                            listEl.innerHTML += `
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
+                                <div class="flex items-center gap-3"><div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold shadow-inner"><span class="material-symbols-outlined !text-[20px]">person</span></div>
+                                <div><p class="text-sm font-semibold text-slate-900">${row.citizenId}</p><p class="text-xs text-slate-500">${row.subject}</p></div></div>
+                                <div class="flex flex-col items-end gap-1">${passedUI}<p class="text-xs font-medium text-slate-500">คะแนน: <span class="text-slate-900 font-bold">${row.score}</span></p></div>
+                            </div>`;
+                        });
+                        switchView('view-admin');
+                    } catch (e) {}
+                }
+            });
+        }
+
+        function exportCSV() {
+            if(!window.adminRawData) return;
+            const csv = ['AttemptID,CitizenID,Subject,Score,Status'];
+            window.adminRawData.forEach(r => csv.push(`${r.attemptId},${r.citizenId},${r.subject},${r.score},${r.passed}`));
+            const blob = new Blob(["\uFEFF"+csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `exam_export.csv`; link.click();
+        }
+    </script>
+</body>
+</html>
